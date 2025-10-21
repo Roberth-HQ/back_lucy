@@ -9,7 +9,9 @@ export class DispositivosController {
 
   @Post()
   async create(@Body() createDispositivoDto: any) {
-        console.log('Body recibido en controlador:', createDispositivoDto);
+        //console.log('Body recibido en controlador:', createDispositivoDto);
+        //console.log("soporte tecnico recibido")
+        //console.log(createDispositivoDto);
     return this.dispositivosService.create(createDispositivoDto);
   }
 

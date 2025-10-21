@@ -2,7 +2,7 @@ export class CreateDispositivoDto {
     ip:string;
     alive:string;
     via:string;
-    divice:string;
+    device:string;
     mac:string;
     name:string;
 }

@@ -10,6 +10,7 @@ export class DispositivosService {
 
   async create(createDispositivoDto: any) {
     //console.log('Dispositivo resivido: ', createDispositivoDto);
+    console.log('Tipo:', typeof createDispositivoDto);
     const response = await fetch('http://localhost:8081/scan',{
       method:'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -17,9 +18,26 @@ export class DispositivosService {
     });
     const text = await response.text();
 
+    // const data= await response.json();
+    // return data;
+
+
+ // const data = JSON.parse(text);
+
+
+  //this.gateway.emitirDispositivo(data);
+
+
+  //console.log("tipo de dato recibido:", typeof data);
+  //console.log("contenido del objeto:", data);
+  //console.log("tipo de propiedad 'type':", typeof data.type);
+  ///return data;
+
+
     try{
       const data=JSON.parse(text);
       this.gateway.emitirDispositivo(data);
+      console.log("tipo de dato recibido",data.type)
       return data;
     }catch (err){
       this.gateway.emitirDispositivo(text);
