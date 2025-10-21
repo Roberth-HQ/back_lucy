@@ -8,8 +8,42 @@ import { DispositivosGateway } from './dispositivos.gateway';
 export class DispositivosService {
   constructor(private readonly gateway: DispositivosGateway){}
 
+
+    async startScan(scanRequestDto: any) {
+    console.log('Inicio de escaneo recibido:', scanRequestDto);
+    const response = await fetch('http://localhost:8081/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scanRequestDto),
+    });
+
+    const text = await response.text();
+    console.log('Respuesta del agente:', text);
+    return text; // Puedes procesar o dejar así
+  }
+
+
+
+    async handleFoundDevice(foundDeviceDto: any) {
+    console.log('Dispositivo recibido del agente:', foundDeviceDto);
+
+    // Emitir por websocket para frontend
+    this.gateway.emitirDispositivo(foundDeviceDto);
+
+    // Detectar mensaje final de escaneo
+    // if (foundDeviceDto.status === 'ok' && foundDeviceDto.message) {
+    //   console.log('Escaneo completado:', foundDeviceDto);
+    //   this.gateway.emitirEventoFinal(foundDeviceDto);
+    // }
+
+    //return { status: 'ok' };
+    console.log("dispositivo enviado: ", foundDeviceDto);
+    return foundDeviceDto;
+  }
+
+
   async create(createDispositivoDto: any) {
-    //console.log('Dispositivo resivido: ', createDispositivoDto);
+    console.log('Dispositivo resivido: ', createDispositivoDto);
     console.log('Tipo:', typeof createDispositivoDto);
     const response = await fetch('http://localhost:8081/scan',{
       method:'POST',
@@ -17,6 +51,7 @@ export class DispositivosService {
       body: JSON.stringify(createDispositivoDto)
     });
     const text = await response.text();
+    console.log("datos del espectro: ",text)
 
     // const data= await response.json();
     // return data;

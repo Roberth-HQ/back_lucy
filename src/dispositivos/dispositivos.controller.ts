@@ -8,11 +8,16 @@ export class DispositivosController {
   constructor(private readonly dispositivosService: DispositivosService) {}
 
   @Post()
-  async create(@Body() createDispositivoDto: any) {
+  async startScan(@Body() scanRequesDto: any) {
         //console.log('Body recibido en controlador:', createDispositivoDto);
         //console.log("soporte tecnico recibido")
-        //console.log(createDispositivoDto);
-    return this.dispositivosService.create(createDispositivoDto);
+        ///console.log(createDispositivoDto);
+    return this.dispositivosService.startScan(scanRequesDto);
+  }
+
+  @Post('found')
+  async foundDevice(@Body() foundDeviceDto: any){
+    return this.dispositivosService.handleFoundDevice(foundDeviceDto);
   }
 
   @Get()
