@@ -24,7 +24,17 @@ export class DispositivosGateway implements OnGatewayConnection, OnGatewayDiscon
   }
 
   // 👉 Método para emitir datos a todos los clientes
-  emitirDispositivo(data: any) {
-    this.server.emit('nuevo_dispositivo', data);
+ // emitirDispositivo(data: any) {
+   // this.server.emit('nuevo_dispositivo', data);
+  //}
+
+    emitirDispositivo(data: any) {
+    console.log('📡 Enviando por socket:', data);
+    this.server.emit('nuevo-dispositivo', data);
+  }
+
+  emitirEventoFinal(data: any) {
+    console.log('✅ Enviando mensaje final:', data);
+    this.server.emit('escaneo-finalizado', data);
   }
 }

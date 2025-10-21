@@ -36,9 +36,9 @@ export class DispositivosService {
     //   this.gateway.emitirEventoFinal(foundDeviceDto);
     // }
 
-    //return { status: 'ok' };
-    console.log("dispositivo enviado: ", foundDeviceDto);
-    return foundDeviceDto;
+    return { status: 'ok' };
+    //console.log("dispositivo enviado: ", foundDeviceDto);
+    //return foundDeviceDto;
   }
 
 
