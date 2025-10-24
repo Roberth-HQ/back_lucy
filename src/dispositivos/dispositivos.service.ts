@@ -25,7 +25,7 @@ export class DispositivosService {
 
 
     async handleFoundDevice(foundDeviceDto: any) {
-    console.log('Dispositivo recibido del agente:', foundDeviceDto);
+    //console.log('Dispositivo recibido del agente:', foundDeviceDto);
 
     // Emitir por websocket para frontend
     this.gateway.emitirDispositivo(foundDeviceDto);
