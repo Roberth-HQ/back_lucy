@@ -2,24 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { CreateDispositivoDto } from './dto/create-dispositivo.dto';
 import { UpdateDispositivoDto } from './dto/update-dispositivo.dto';
 import { json } from 'stream/consumers';
-import { DispositivosGateway } from './dispositivos.gateway';
+import { DispositivosGateway } from './ws/dispositivos.gateway';
+import { AgentesWsService } from './ws/agentes.ws.service'; // 
 
 @Injectable()
 export class DispositivosService {
-  constructor(private readonly gateway: DispositivosGateway){}
+  constructor(private readonly gateway: DispositivosGateway,
+               private readonly agentesWs:AgentesWsService,
+  ){}
 
 
-    async startScan(scanRequestDto: any) {
-    console.log('Inicio de escaneo recibido:', scanRequestDto);
-    const response = await fetch('http://localhost:8081/scan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(scanRequestDto),
-    });
+  async startScan(scanRequestDto: any) {
+    console.log('📡 Inicio de escaneo recibido desde el frontend:', scanRequestDto);
 
-    const text = await response.text();
-    console.log('Respuesta del agente:', text);
-    return text; // Puedes procesar o dejar así
+    // 👇 Enviar el comando de escaneo a los agentes conectados (ya no con fetch)
+    this.agentesWs.sendScanRequestToAgents(scanRequestDto.subred);
+
+    return { status: 'ok', msg: `Comando de escaneo enviado a agentes: ${scanRequestDto.subred}` };
   }
 
 
