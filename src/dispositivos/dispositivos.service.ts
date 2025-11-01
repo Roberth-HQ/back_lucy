@@ -3,7 +3,7 @@ import { CreateDispositivoDto } from './dto/create-dispositivo.dto';
 import { UpdateDispositivoDto } from './dto/update-dispositivo.dto';
 import { json } from 'stream/consumers';
 import { DispositivosGateway } from './ws/dispositivos.gateway';
-import { AgentesWsService } from './ws/agentes.ws.service'; // 
+import { AgentesWsService } from '../agents/ws/agentes.ws.service'; // 
 
 @Injectable()
 export class DispositivosService {
