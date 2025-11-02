@@ -1,37 +1,29 @@
+// agents/agent.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('agents')
-export class Agent {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class AgentEntity {
+  @Column({ primary: true })
+  agentId: string; // UUID generado automáticamente
 
-  @Column({ unique: true })
-  agent_id: string;
-
-  @Column({ nullable: true })
-  hostname: string;
-
-  @Column({ nullable: true })
-  mac: string;
-
-  @Column({ nullable: true })
+  @Column()
   subnet: string;
 
-  @Column({ nullable: true })
-  type: string; // 'GLPI' | 'GLPI_PLUS'
-
-  @Column({ nullable: true })
-  status: string; // 'online' | 'offline' | 'busy'
-
-  @Column({ nullable: true })
-  ram_gb: number;
-
-  @Column({ nullable: true })
-  cpu_cores: number;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  last_seen: Date;
+  @Column({ default: 'online' })
+  status: 'online' | 'offline';
 
   @Column({ default: false })
-  is_default: boolean;
+  isFallback: boolean; // true si es el agente principal de respaldo
+
+  @Column({ default: 1 })
+  leaderNumber: number; // 1 = líder de su subred
+
+  @Column({ default: 1 })
+  cpuCores: number;
+
+  @Column({ default: 1024 })
+  ramMb: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  lastSeen: Date; // para saber si está activo
 }

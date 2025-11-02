@@ -1,67 +1,107 @@
-    // dispositivos.ws.ts
-    import { WebSocketServer } from 'ws';
-    import { Injectable, OnModuleInit } from '@nestjs/common';
-    
-    interface Agent {
-    agentId: string;
-    socket: WebSocket;
-    subnet: string;
-    type: string;
-    status: 'online' | 'offline' | 'busy';
-    }
+import { WebSocketServer } from 'ws';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { AgentsService } from './../agents.service';
 
-    @Injectable()
-    export class AgentesWsService  implements OnModuleInit {
-    private wss: WebSocketServer;
-    private agents: Map<string, Agent> = new Map();
+// Interfaz para los agentes que están conectados por WS
+interface Agent {
+  agentId: string;
+  socket: WebSocket;
+  subnet: string;
+  status: 'online' | 'offline';
+  leaderNumber: number;
+  cpuCores: number;
+  ramMb: number;
+  isFallback: boolean;
+}
 
-    onModuleInit() {
-        this.wss = new WebSocketServer({ port: 8082 }); // puedes cambiar el puerto si deseas
-        console.log('🌐 Servidor WebSocket escuchando en ws://localhost:8082');
+@Injectable()
+export class AgentesWsService implements OnModuleInit {
+  private wss: WebSocketServer;
+  private agents: Map<string, Agent> = new Map();
 
-        this.wss.on('connection', (ws, req) => {
-        console.log('✅ Agente conectado desde:', req.socket.remoteAddress);
+  constructor(private readonly agentsService: AgentsService) {}
 
-        ws.send(JSON.stringify({ msg: 'Conexión establecida con backend NestJS ✅' }));
+  onModuleInit() {
+    this.wss = new WebSocketServer({ port: 8082 });
+    console.log('🌐 Servidor WebSocket escuchando en ws://localhost:8082');
 
-        ws.on('message', (message) => {
-            console.log('📩 Mensaje recibido del agente:', message.toString());
-        });
+    this.wss.on('connection', (ws, req) => {
+      console.log('✅ Agente conectado desde:', req.socket.remoteAddress);
 
-        ws.on('close', () => {
-            console.log('❌ Agente desconectado');
-        });
-        });
-    }
+      ws.send(JSON.stringify({ msg: 'Conexión establecida con backend NestJS ✅' }));
 
-    // Método para enviar mensajes a todos los agentes conectados
-    broadcast(data: any) {
-        const json = JSON.stringify(data);
-        this.wss.clients.forEach((client) => {
-        if (client.readyState === 1) {
-            client.send(json);
+      // Listener único para todos los mensajes del agente
+      ws.on('message', async (message) => {
+        console.log('📩 Mensaje recibido del agente:', message.toString());
+        try {
+          const data = JSON.parse(message.toString());
+
+if (data.type === 'register') {
+  const agentPayload = data.data;  // Aquí está todo: agentId, subnet, cpuCores, ramMb, isFallback
+  const savedAgent = await this.agentsService.registerAgent({
+    agentId: agentPayload.agentId,
+    subnet: agentPayload.subnet,
+    cpuCores: agentPayload.cpuCores,
+    ramMb: agentPayload.ramMb,
+    isFallback: agentPayload.isFallback || false,
+  });
+
+  // Guardar en Map para WS
+  this.agents.set(savedAgent.agentId, { ...savedAgent, socket: ws });
+
+  ws.send(JSON.stringify({
+    type: 'ack',
+    agentId: savedAgent.agentId,
+    leaderNumber: savedAgent.leaderNumber
+  }));
+}
+
+          // Aquí podrías agregar otros tipos de mensajes (scan_result, etc.)
+        } catch (err) {
+          console.error('Error procesando mensaje:', err);
         }
-        });
-    }
+      });
 
+      ws.on('close', () => {
+        console.log('❌ Agente desconectado');
+        // Actualizar el estado en el Map y en la BD
+        for (const [id, agent] of this.agents.entries()) {
+          if (agent.socket === ws) {
+            agent.status = 'offline';
+            this.agentsService.updateStatus(id, 'offline');
+            this.agents.delete(id);
+            break;
+          }
+        }
+      });
+    });
+  }
 
-    // dispositivos.ws.ts (añadir dentro de DispositivosWsService)
-    sendScanRequestToAgents(subred: string) {
+  // Enviar mensaje a todos los agentes conectados
+  broadcast(data: any) {
+    const json = JSON.stringify(data);
+    this.wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(json);
+      }
+    });
+  }
+
+  // Enviar un scan_request a todos los agentes
+  sendScanRequestToAgents(subnet: string) {
     const message = {
-        type: 'scan_request',   // tipo de mensaje que el agente entenderá
-        data: {
-        subred: subred
-        }
+      type: 'scan_request',
+      data: { subnet },
     };
 
     const json = JSON.stringify(message);
 
     this.wss.clients.forEach((client) => {
-        if (client.readyState === 1) { // solo clientes conectados
+      if (client.readyState === 1) {
         client.send(json);
-        }
+      }
     });
 
-    console.log(`📤 Comando scan_request enviado a todos los agentes: ${subred}`);
-    }
-    }
+    console.log(`📤 Comando scan_request enviado a todos los agentes: ${subnet}`);
+  }
+}
