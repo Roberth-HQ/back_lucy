@@ -3,6 +3,7 @@ import { DispositivosModule } from './dispositivos/dispositivos.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsModule } from './agents/agents.module';
+import { EscaneosModule } from './escaneos/escaneos.module';
 
 
 @Module({
@@ -17,7 +18,8 @@ import { AgentsModule } from './agents/agents.module';
       synchronize:true
     }),
     DispositivosModule,
-    AgentsModule],
+    AgentsModule,
+    EscaneosModule],
 
   
 })

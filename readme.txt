@@ -9,3 +9,5 @@ npm install @nestjs/config
 
 para comandos rapidos:
 npm install -g @nestjs/cli
+
+nest g resource escaneos

@@ -28,12 +28,13 @@ export class DispositivosService {
 
     // Emitir por websocket para frontend
     this.gateway.emitirDispositivo(foundDeviceDto);
+    console.log("*********")
 
     // Detectar mensaje final de escaneo
-    // if (foundDeviceDto.status === 'ok' && foundDeviceDto.message) {
-    //   console.log('Escaneo completado:', foundDeviceDto);
-    //   this.gateway.emitirEventoFinal(foundDeviceDto);
-    // }
+    if (foundDeviceDto.status === 'ok' && foundDeviceDto.message) {
+      console.log('Escaneo completado:', foundDeviceDto);
+      this.gateway.emitirEventoFinal(foundDeviceDto);
+    }
 
     return { status: 'ok' };
     //console.log("dispositivo enviado: ", foundDeviceDto);

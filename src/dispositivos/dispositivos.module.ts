@@ -5,9 +5,10 @@ import { DispositivosController } from './dispositivos.controller';
 import { AgentesWsService  } from '../agents/ws/agentes.ws.service'; // ⬅️ importamos el WS, DispositivosWsService
 //import { DispositivosAgentGateway } from './dispositivos.agent.gateway';
 import { AgentsModule } from '../agents/agents.module'
+import { EscaneosModule } from 'src/escaneos/escaneos.module';
 
 @Module({
-  imports:[AgentsModule],
+  imports:[AgentsModule,EscaneosModule],
   controllers: [DispositivosController],
   providers: [DispositivosService, DispositivosGateway ],
 })
