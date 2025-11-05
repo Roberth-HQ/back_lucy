@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsModule } from './agents/agents.module';
 import { EscaneosModule } from './escaneos/escaneos.module';
+import { EquiposModule } from './equipos/equipos.module';
 
 
 @Module({
@@ -19,7 +20,8 @@ import { EscaneosModule } from './escaneos/escaneos.module';
     }),
     DispositivosModule,
     AgentsModule,
-    EscaneosModule],
+    EscaneosModule,
+    EquiposModule],
 
   
 })
