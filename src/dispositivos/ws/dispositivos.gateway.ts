@@ -8,12 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { CreateEscaneoDetalleDto } from '../../escaneos/dto/create-escaneo-detalle.dto';
-//import { CreateEscaneoDetalleDto } from '../escaneos/dto/create-escaneo-detalle.dto';
-//import { CreateEscaneoResumenDto } from '../escaneos/dto/create-escaneo-resumen.dto';
 import { CreateEscaneoResumenDto } from '../../escaneos/dto/create-escaneo-resumen.dto';
-//import { EscaneosService } from '../../escaneos/escaneos.service'
-
-
 
 @WebSocketGateway({
   cors: {
@@ -22,7 +17,6 @@ import { CreateEscaneoResumenDto } from '../../escaneos/dto/create-escaneo-resum
 })
 export class DispositivosGateway implements OnGatewayConnection, OnGatewayDisconnect {
   //buffer de datos de dispostivos 
-
   private bufferDispositivos: { [subred: string]: any[] } = {};
   constructor (private readonly  escaneosService: EscaneosService){}
   @WebSocketServer()
@@ -52,7 +46,6 @@ export class DispositivosGateway implements OnGatewayConnection, OnGatewayDiscon
 
 emitirDispositivo(data: any) {
   console.log('📡 Enviando por socket:', data);
-
   // 1️⃣ Emitir inmediatamente al Front
   this.server.emit('nuevo-dispositivo', data);
 
@@ -63,7 +56,7 @@ if (!this.bufferDispositivos[subred]) this.bufferDispositivos[subred] = [];
 this.bufferDispositivos[subred].push({ ...data });
 
 // LOG inmediato (verás en consola cómo queda)
-console.log('📥 buffer actual (después push):', JSON.stringify(this.bufferDispositivos, null, 2));
+//console.log('📥 buffer actual (después push):', JSON.stringify(this.bufferDispositivos, null, 2));
 }
 
 // Método que se llama cuando llega el mensaje final de la subred

@@ -16,9 +16,22 @@ export class DispositivosService {
     console.log('📡 Inicio de escaneo recibido desde el frontend:', scanRequestDto);
 
     // 👇 Enviar el comando de escaneo a los agentes conectados (ya no con fetch)
-    this.agentesWs.sendScanRequestToAgents(scanRequestDto.subred);
+    //this.agentesWs.sendScanRequestToAgents(scanRequestDto.subred);
+    // Construimos el mensaje que se enviará al agente correcto
+  const message = {
+    type: 'scan_request',
+    data: { subnet: scanRequestDto.subred },
+  };
 
-    return { status: 'ok', msg: `Comando de escaneo enviado a agentes: ${scanRequestDto.subred}` };
+  // 👇 Enviar SOLO al agente correcto (por subred o fallback)
+  this.agentesWs.sendToAgent(scanRequestDto.subred, message);
+
+  return {
+    status: 'ok',
+    msg: `Comando de escaneo enviado para subred: ${scanRequestDto.subred}`,
+  };
+
+    //return { status: 'ok', msg: `Comando de escaneo enviado a agentes: ${scanRequestDto.subred}` };
   }
 
 

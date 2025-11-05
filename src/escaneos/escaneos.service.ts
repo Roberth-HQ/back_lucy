@@ -22,14 +22,36 @@ export class EscaneosService {
     return await this.resumenRepo.save(resumen);
   }
 
+  // async guardarDetalles(resumenId: string, detalles: CreateEscaneoDetalleDto[]) {
+  //   const detallesEntity = detalles.map(d => {
+  //     const entity = this.detalleRepo.create(d);
+  //     entity.escaneoResumenId = resumenId;
+  //     return entity;
+  //   });
+  //   return await this.detalleRepo.save(detallesEntity);
+  // }
   async guardarDetalles(resumenId: string, detalles: CreateEscaneoDetalleDto[]) {
-    const detallesEntity = detalles.map(d => {
-      const entity = this.detalleRepo.create(d);
-      entity.escaneoResumenId = resumenId;
-      return entity;
+  const detallesEntity = detalles.map(d => {
+    const entity = this.detalleRepo.create({
+      ...d,
+      // Sanear solo campos que puedan traer bytes sucios
+      name: this.sanitizeString(d.name),
+      device: this.sanitizeString(d.device),
     });
-    return await this.detalleRepo.save(detallesEntity);
-  }
+    entity.escaneoResumenId = resumenId;
+    return entity;
+  });
+
+  return await this.detalleRepo.save(detallesEntity);
+}
+
+// Función para sanear strings no UTF-8 o caracteres problemáticos
+sanitizeString(str: string | undefined): string {
+  if (!str) return '';
+  // Reemplaza bytes nulos y caracteres no imprimibles
+  return str.replace(/[\x00-\x1F\x7F-\x9F]/g, '?').trim();
+}
+
 
   async obtenerUltimoResumenPorSubred(subred: string) {
     return await this.resumenRepo.findOne({

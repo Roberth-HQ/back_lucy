@@ -48,6 +48,7 @@ if (data.type === 'register') {
 
   // Guardar en Map para WS
   this.agents.set(savedAgent.agentId, { ...savedAgent, socket: ws });
+  //console.log('📍 Estado actual del Map:', Array.from(this.agents.entries()));
 
   ws.send(JSON.stringify({
     type: 'ack',
@@ -62,17 +63,18 @@ if (data.type === 'register') {
         }
       });
 
-      ws.on('close', () => {
+      ws.on('close', async() => {
         console.log('❌ Agente desconectado');
         // Actualizar el estado en el Map y en la BD
         for (const [id, agent] of this.agents.entries()) {
           if (agent.socket === ws) {
             agent.status = 'offline';
-            this.agentsService.updateStatus(id, 'offline');
+            await this.agentsService.updateStatus(id, 'offline');
             this.agents.delete(id);
             break;
           }
         }
+       // console.log('📍 Estado actual del Map:', Array.from(this.agents.entries()));
       });
     });
   }
@@ -104,4 +106,59 @@ if (data.type === 'register') {
 
     console.log(`📤 Comando scan_request enviado a todos los agentes: ${subnet}`);
   }
+
+
+  sendToAgent(subnet: string, message: any, agentId?: string) {
+  // Si hay agentId explícito, buscar ese primero
+  let targetAgent: Agent | undefined;
+
+  if (agentId) {
+    targetAgent = this.agents.get(agentId);
+    if (!targetAgent) {
+      console.warn(`⚠️ No se encontró el agente con ID ${agentId} en el Map.`);
+    }
+  }
+
+  // Si no hay agentId o no se encontró, buscar por subred
+  if (!targetAgent) {
+    const agentsInSubnet = Array.from(this.agents.values()).filter(
+      (a) => a.subnet === subnet
+    );
+
+    if (agentsInSubnet.length > 0) {
+      // Ordenar por leaderNumber (menor = mayor prioridad)
+      agentsInSubnet.sort((a, b) => a.leaderNumber - b.leaderNumber);
+      targetAgent = agentsInSubnet[0]; // El líder actual
+    }
+  }
+
+  // Si aún no hay agente, usar fallback
+  if (!targetAgent) {
+    const fallback = Array.from(this.agents.values()).find(
+      (a) => a.isFallback
+    );
+
+    if (fallback) {
+      console.log(`⚙️ Usando agente fallback: ${fallback.agentId}`);
+      targetAgent = fallback;
+    }
+  }
+
+  // Si finalmente tenemos un agente, enviamos el mensaje
+  if (targetAgent && targetAgent.socket?.readyState === 1) {
+    try {
+      const json = JSON.stringify(message);
+      targetAgent.socket.send(json);
+      console.log(
+        `📤 Mensaje enviado a agente ${targetAgent.agentId} (subred ${targetAgent.subnet})`
+      );
+    } catch (err) {
+      console.error(`❌ Error al enviar mensaje al agente ${targetAgent.agentId}:`, err);
+    }
+  } else {
+    console.warn(
+      `⚠️ No hay agentes disponibles para la subred ${subnet} ni fallback online.`
+    );
+  }
+}
 }
